@@ -74,7 +74,7 @@ const server = http.createServer((req, res) => {
   }
 
   // Rota do proxy
-  if (req.method === 'POST' && req.url === '/api/anthropic') {
+  if (req.method === 'POST' && req.url === 'https://planodenegocio.onrender.com//api/anthropic') {
     proxyAnthropic(req, res);
     return;
   }
