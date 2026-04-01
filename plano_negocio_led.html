@@ -1,0 +1,914 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PainelPRO — Análise de Viabilidade OOH</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0D0D0D;--paper:#F5F0E8;--cream:#EDE8DC;
+  --gold:#C8932A;--gold-light:#E8B84B;
+  --rust:#B85C2A;--green:#2A7A4B;--red:#A32B2B;--blue:#1A5C9A;
+  --border:rgba(13,13,13,.12);--radius:2px;
+  --serif:'Playfair Display',Georgia,serif;
+  --sans:'DM Sans',sans-serif;--mono:'DM Mono',monospace;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--paper);color:var(--ink);min-height:100vh;overflow-x:hidden}
+
+/* HEADER */
+header{background:var(--ink);color:var(--paper);position:relative;overflow:hidden}
+.hn{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.04'/%3E%3C/svg%3E");opacity:.4;pointer-events:none}
+.hi{position:relative;max-width:1100px;margin:0 auto;padding:44px 40px 36px;display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:16px}
+.bi{width:50px;height:50px;background:var(--gold);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.bt h1{font-family:var(--serif);font-size:1.9rem;font-weight:900;letter-spacing:-.02em;line-height:1;color:var(--paper)}
+.bt p{font-size:.74rem;font-weight:500;letter-spacing:.12em;text-transform:uppercase;color:var(--gold);margin-top:4px}
+.hm{text-align:right;font-size:.74rem;color:rgba(245,240,232,.42);line-height:1.75}
+
+/* MAIN */
+main{max-width:1100px;margin:0 auto;padding:44px 40px}
+
+/* FORM */
+.fw{background:var(--cream);border:1px solid var(--border);border-top:3px solid var(--gold);padding:40px;margin-bottom:48px;position:relative}
+.fw::before{content:'DADOS DO PROJETO';position:absolute;top:-1px;left:40px;background:var(--gold);color:var(--ink);font-size:.63rem;font-weight:600;letter-spacing:.14em;padding:3px 10px;transform:translateY(-100%)}
+.fg{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:22px 28px}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:.69rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(13,13,13,.5)}
+.field input,.field select{font-family:var(--sans);font-size:.93rem;font-weight:500;padding:10px 13px;border:1px solid var(--border);background:var(--paper);color:var(--ink);border-radius:var(--radius);outline:none;transition:border-color .2s,box-shadow .2s;width:100%}
+.field input:focus,.field select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(200,147,42,.14)}
+.field input.error{border-color:var(--red);background:#fff5f5}
+.field .hint{font-size:.67rem;color:rgba(13,13,13,.36);margin-top:1px}
+.field .err-msg{font-size:.67rem;color:var(--red);margin-top:1px;display:none}
+.field.has-error .err-msg{display:block}
+.ff{margin-top:30px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+.btn-g{font-family:var(--sans);font-size:.83rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;padding:13px 34px;background:var(--ink);color:var(--paper);border:none;border-radius:var(--radius);cursor:pointer;transition:background .2s,transform .1s;position:relative;overflow:hidden;min-width:215px}
+.btn-g:hover:not(:disabled){background:#1a1a1a}
+.btn-g:active:not(:disabled){transform:scale(.98)}
+.btn-g:disabled{background:#666;cursor:not-allowed}
+.btn-g .gl{position:absolute;bottom:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--gold),var(--gold-light))}
+.btn-clr{font-family:var(--sans);font-size:.8rem;font-weight:500;color:rgba(13,13,13,.38);background:none;border:none;cursor:pointer;padding:4px 0;border-bottom:1px solid transparent;transition:color .2s,border-color .2s}
+.btn-clr:hover{color:var(--ink);border-color:var(--ink)}
+
+/* LOADING */
+.lo{display:none;background:var(--cream);border:1px solid var(--border);border-top:3px solid var(--gold);padding:48px 40px;text-align:center;margin-bottom:48px}
+.lo.active{display:block}
+.lsp{width:40px;height:40px;border:3px solid rgba(200,147,42,.2);border-top-color:var(--gold);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 20px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.lst{list-style:none;max-width:360px;margin:0 auto;text-align:left}
+.lst li{font-size:.83rem;color:rgba(13,13,13,.36);padding:7px 0;border-bottom:1px dashed rgba(13,13,13,.1);display:flex;align-items:center;gap:10px;transition:color .3s}
+.lst li.done{color:var(--green)}.lst li.active-step{color:var(--ink);font-weight:600}
+.lst li .si{font-size:.95rem;width:20px;text-align:center}
+
+/* ERRO DE API */
+.api-error{background:#fff5f5;border:2px solid var(--red);border-radius:var(--radius);padding:28px 32px;margin-bottom:32px;display:none}
+.api-error.show{display:block}
+.api-error h4{font-family:var(--serif);color:var(--red);font-size:1.1rem;margin-bottom:10px}
+.api-error p{font-size:.88rem;line-height:1.7;color:rgba(13,13,13,.7)}
+
+/* REPORT */
+#report{display:none;animation:fadeUp .5s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.rh{background:var(--ink);color:var(--paper);padding:48px 48px 40px;position:relative;overflow:hidden;margin-bottom:1px}
+.rhn{position:absolute;inset:0;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='.05'/%3E%3C/svg%3E");pointer-events:none}
+.rha{position:absolute;right:0;top:0;bottom:0;width:6px;background:linear-gradient(180deg,var(--gold),var(--gold-light))}
+.rhl{font-size:.67rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--gold);margin-bottom:12px}
+.rh h2{font-family:var(--serif);font-size:2.3rem;font-weight:900;line-height:1.1;letter-spacing:-.02em;margin-bottom:20px}
+.rm{display:flex;gap:28px;flex-wrap:wrap}
+.rm span{font-size:.75rem;color:rgba(245,240,232,.5)}
+.rm span strong{color:var(--paper);font-weight:600;display:block;font-size:.85rem;margin-bottom:1px}
+.rb{background:var(--cream);border:1px solid var(--border);border-top:none}
+.rs{padding:34px 48px;border-bottom:1px solid var(--border)}
+.rs:last-child{border-bottom:none}
+.rsl{font-size:.62rem;font-weight:700;letter-spacing:.2em;text-transform:uppercase;color:var(--gold);margin-bottom:5px}
+.rs h3{font-family:var(--serif);font-size:1.42rem;font-weight:700;margin-bottom:18px;letter-spacing:-.01em}
+.rs p{font-size:.9rem;line-height:1.78;color:rgba(13,13,13,.75);margin-bottom:11px}
+.rs p:last-child{margin-bottom:0}
+
+/* BADGE IBGE */
+.ibge-badge{display:inline-flex;align-items:center;gap:6px;font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;border:1px solid rgba(26,92,154,.3);padding:3px 10px;margin-bottom:14px;color:var(--blue)}
+.ibge-badge::before{content:'📊 '}
+
+/* AI CONTENT */
+.aic{background:var(--paper);border-left:3px solid var(--gold);padding:14px 20px;margin:13px 0;font-size:.89rem;line-height:1.78;color:rgba(13,13,13,.77)}
+.aic p{margin-bottom:9px}.aic p:last-child{margin-bottom:0}
+
+/* ALERTAS DE VIABILIDADE */
+.alert-box{border:2px solid;padding:22px 26px;margin:18px 0;border-radius:var(--radius)}
+.alert-box.success{border-color:var(--green);background:rgba(42,122,75,.06)}
+.alert-box.warning{border-color:var(--rust);background:rgba(184,92,42,.06)}
+.alert-box.danger {border-color:var(--red);background:rgba(163,43,43,.06)}
+.alert-title{font-family:var(--serif);font-size:1.1rem;font-weight:700;margin-bottom:9px;display:flex;align-items:center;gap:8px}
+.alert-box.success .alert-title{color:var(--green)}
+.alert-box.warning .alert-title{color:var(--rust)}
+.alert-box.danger  .alert-title{color:var(--red)}
+
+/* PAINEL ALTERNATIVO */
+.alt-panel{background:var(--paper);border:1px solid var(--border);border-top:3px solid var(--blue);padding:26px 30px;margin:18px 0}
+.alt-label{font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--blue);margin-bottom:11px}
+.alt-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin:14px 0}
+.ac{background:var(--paper);padding:16px 18px}
+.ac-l{font-size:.65rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:rgba(13,13,13,.4);margin-bottom:4px}
+.ac-v{font-family:var(--mono);font-size:1.15rem;font-weight:500;color:var(--blue)}
+.ac-v.ok{color:var(--green)}
+.ac-s{font-size:.67rem;color:rgba(13,13,13,.36);margin-top:3px}
+
+/* KPI */
+.kpi-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(152px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);margin:20px 0}
+.kc{background:var(--paper);padding:18px 20px;position:relative}
+.kc::after{content:'';position:absolute;top:0;left:0;right:0;height:2px}
+.kc.gold::after{background:var(--gold)}.kc.green::after{background:var(--green)}
+.kc.rust::after{background:var(--rust)}.kc.ink::after{background:var(--ink)}
+.kl{font-size:.65rem;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:rgba(13,13,13,.4);margin-bottom:5px}
+.kv{font-family:var(--mono);font-size:1.25rem;font-weight:500;color:var(--ink);line-height:1}
+.ks{font-size:.67rem;color:rgba(13,13,13,.35);margin-top:3px}
+
+/* TABELA IBGE */
+.ibge-table{width:100%;border-collapse:collapse;font-size:.82rem;margin:12px 0}
+.ibge-table td{padding:8px 11px;border-bottom:1px dashed rgba(13,13,13,.08)}
+.ibge-table td:first-child{font-size:.7rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:rgba(13,13,13,.44);width:44%}
+.ibge-table td:last-child{font-family:var(--mono);font-weight:500}
+.ibge-table tr:last-child td{border-bottom:none}
+
+/* CENÁRIOS */
+.sc-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(192px,1fr));gap:14px;margin:16px 0}
+.sc{padding:21px;border:1px solid var(--border);border-top:3px solid transparent;background:var(--paper)}
+.sc.conservador{border-top-color:var(--rust)}.sc.realista{border-top-color:var(--gold)}.sc.otimista{border-top-color:var(--green)}
+.sc-t{font-size:.67rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;margin-bottom:11px}
+.sc.conservador .sc-t{color:var(--rust)}.sc.realista .sc-t{color:var(--gold)}.sc.otimista .sc-t{color:var(--green)}
+.sr{display:flex;justify-content:space-between;align-items:baseline;padding:6px 0;border-bottom:1px dashed rgba(13,13,13,.1);font-size:.8rem}
+.sr:last-child{border-bottom:none}
+.sr .sl{color:rgba(13,13,13,.5)}.sr .sv{font-family:var(--mono);font-weight:500;font-size:.82rem}
+
+/* LISTAS */
+.rl{list-style:none;margin:10px 0}
+.rl li{font-size:.88rem;line-height:1.62;color:rgba(13,13,13,.72);padding:6px 0 6px 21px;position:relative;border-bottom:1px dashed rgba(13,13,13,.07)}
+.rl li:last-child{border-bottom:none}
+.rl li::before{content:'→';position:absolute;left:0;color:var(--gold);font-weight:700}
+
+/* CHART */
+.cw{margin:20px 0;padding:22px;background:var(--paper);border:1px solid var(--border)}
+.ct{font-size:.69rem;font-weight:600;letter-spacing:.1em;text-transform:uppercase;color:rgba(13,13,13,.4);margin-bottom:13px}
+canvas{max-width:100%;display:block}
+
+/* TABELA PROJEÇÃO */
+.pt{width:100%;border-collapse:collapse;font-size:.81rem;margin:13px 0}
+.pt th{text-align:left;padding:7px 11px;font-size:.66rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:rgba(13,13,13,.4);border-bottom:1px solid var(--border);background:var(--paper)}
+.pt td{padding:9px 11px;border-bottom:1px dashed rgba(13,13,13,.07);font-family:var(--mono);font-size:.79rem;color:rgba(13,13,13,.72)}
+.pt tr:hover td{background:rgba(200,147,42,.04)}
+.pos{color:var(--green)}.neg{color:var(--red)}
+
+/* AÇÕES */
+.ra{display:flex;gap:11px;flex-wrap:wrap;margin-top:26px;padding-top:20px;border-top:1px solid var(--border)}
+.btn-p{font-family:var(--sans);font-size:.79rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:10px 24px;background:transparent;color:var(--ink);border:1px solid var(--ink);border-radius:var(--radius);cursor:pointer;transition:background .2s,color .2s}
+.btn-p:hover{background:var(--ink);color:var(--paper)}
+
+.hl{color:var(--gold);font-weight:600}
+.hl-g{color:var(--green);font-weight:600}
+.hl-r{color:var(--red);font-weight:600}
+.hl-b{color:var(--blue);font-weight:600}
+
+@media(max-width:680px){
+  main,.fw,.rs,.rh{padding-left:20px;padding-right:20px}
+  .rh h2{font-size:1.5rem}.fw::before{left:20px}
+}
+@media print{
+  header,.fw,.lo,.api-error,.ra,.btn-g{display:none!important}
+  #report{display:block!important}body{background:#fff}.rb{border:none}
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="hn"></div>
+  <div class="hi">
+    <div class="brand">
+      <div class="bi">📡</div>
+      <div class="bt">
+        <h1>PainelPRO</h1>
+        <p>Análise de Viabilidade OOH</p>
+      </div>
+    </div>
+    <div class="hm">Mídia Out-of-Home · Painéis de LED<br>Dados reais do IBGE · Análise 100% sincera</div>
+  </div>
+</header>
+
+<main>
+
+<!-- FORMULÁRIO -->
+<div class="fw">
+  <form id="planForm" novalidate>
+    <div class="fg">
+
+      <div class="field" id="f-cidade">
+        <label for="cidade">Cidade</label>
+        <input type="text" id="cidade" placeholder="Ex: Caruaru" autocomplete="off">
+        <span class="hint">Nome exato do município</span>
+        <span class="err-msg">Informe a cidade.</span>
+      </div>
+
+      <div class="field" id="f-estado">
+        <label for="estado">Estado (UF)</label>
+        <select id="estado">
+          <option value="">Selecione...</option>
+          <option>AC</option><option>AL</option><option>AP</option><option>AM</option>
+          <option>BA</option><option>CE</option><option>DF</option><option>ES</option>
+          <option>GO</option><option>MA</option><option>MT</option><option>MS</option>
+          <option>MG</option><option>PA</option><option>PB</option><option>PR</option>
+          <option>PE</option><option>PI</option><option>RJ</option><option>RN</option>
+          <option>RS</option><option>RO</option><option>RR</option><option>SC</option>
+          <option>SP</option><option>SE</option><option>TO</option>
+        </select>
+        <span class="err-msg">Selecione o estado.</span>
+      </div>
+
+      <div class="field" id="f-investimento">
+        <label for="investimento">Investimento inicial</label>
+        <input type="text" id="investimento" inputmode="numeric" placeholder="R$ 0,00">
+        <span class="hint">Painel + instalação + capital de giro</span>
+        <span class="err-msg">Informe o investimento.</span>
+      </div>
+
+      <div class="field" id="f-custos">
+        <label for="custos">Custos mensais totais</label>
+        <input type="text" id="custos" inputmode="numeric" placeholder="R$ 0,00">
+        <span class="hint">Energia + manutenção + outros</span>
+        <span class="err-msg">Informe os custos mensais.</span>
+      </div>
+
+      <div class="field" id="f-preco">
+        <label for="preco">Preço médio por anúncio</label>
+        <input type="text" id="preco" inputmode="numeric" placeholder="R$ 0,00">
+        <span class="hint">Valor mensal por anunciante</span>
+        <span class="err-msg">Informe o preço do anúncio.</span>
+      </div>
+
+      <div class="field" id="f-slots">
+        <label for="slots">Slots disponíveis por mês</label>
+        <input type="text" id="slots" inputmode="numeric" placeholder="Ex: 10">
+        <span class="hint">Nº máximo de anunciantes simultâneos</span>
+        <span class="err-msg">Informe os slots (mín. 1).</span>
+      </div>
+
+      <div class="field" id="f-ocupacao">
+        <label for="ocupacao">Taxa de ocupação estimada (%)</label>
+        <input type="text" id="ocupacao" inputmode="numeric" placeholder="Ex: 70">
+        <span class="hint">% dos slots que serão vendidos</span>
+        <span class="err-msg">Informe entre 1 e 100%.</span>
+      </div>
+
+    </div>
+    <div class="ff">
+      <button type="submit" class="btn-g" id="btnGerar">
+        Gerar Plano de Negócio
+        <span class="gl"></span>
+      </button>
+      <button type="button" class="btn-clr" onclick="clearForm()">Limpar formulário</button>
+    </div>
+  </form>
+</div>
+
+<!-- ERRO DE API -->
+<div class="api-error" id="apiError">
+  <h4>⚠️ Não foi possível obter dados reais</h4>
+  <p id="apiErrorMsg">O sistema não conseguiu acessar a API para buscar os dados reais desta cidade. Verifique sua conexão com a internet e tente novamente. O relatório <strong>não será gerado com dados estimados</strong> — somente com dados verificados.</p>
+</div>
+
+<!-- LOADING -->
+<div class="lo" id="loadingOverlay">
+  <div class="lsp"></div>
+  <h3 style="font-family:var(--serif);font-size:1.22rem;margin-bottom:18px">Consultando dados reais…</h3>
+  <ul class="lst">
+    <li id="step1"><span class="si">📊</span> Buscando dados do IBGE para a cidade</li>
+    <li id="step2"><span class="si">🏙️</span> Verificando perfil econômico e comercial</li>
+    <li id="step3"><span class="si">💰</span> Calculando viabilidade financeira</li>
+    <li id="step4"><span class="si">📝</span> Montando relatório e recomendações</li>
+  </ul>
+</div>
+
+<div id="report"></div>
+
+</main>
+
+<script>
+/* ================================================================
+   ENDPOINT DA API
+   Chamadas vão para o proxy local (server.js) que injeta
+   a chave no servidor — nunca exposta no browser
+================================================================ */
+const API_ENDPOINT = '/api/anthropic';
+
+/* ================================================================
+   MÁSCARAS DE ENTRADA — padrão ABNT/Brasil
+================================================================ */
+function maskMoney(el){
+  function fmt(){
+    let d=el.value.replace(/\D/g,'');
+    if(!d){el.dataset.raw='';return}
+    let n=parseInt(d,10)/100;
+    el.dataset.raw=String(n);
+    el.value='R$\u00a0'+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  }
+  el.addEventListener('input',fmt);
+  el.addEventListener('blur',fmt);
+  el.addEventListener('focus',()=>{
+    el.value=el.value.replace(/\D/g,'');
+    setTimeout(()=>{el.selectionStart=el.selectionEnd=el.value.length},0);
+  });
+}
+function maskInt(el){
+  function fmt(){
+    let d=el.value.replace(/\D/g,'');
+    if(!d){el.dataset.raw='';return}
+    let n=parseInt(d,10);el.dataset.raw=String(n);
+    el.value=n.toLocaleString('pt-BR');
+  }
+  el.addEventListener('input',fmt);el.addEventListener('blur',fmt);
+  el.addEventListener('focus',()=>{
+    el.value=el.value.replace(/\D/g,'');
+    setTimeout(()=>{el.selectionStart=el.selectionEnd=el.value.length},0);
+  });
+}
+function maskPct(el){
+  el.addEventListener('input',()=>{
+    let d=el.value.replace(/\D/g,'');
+    let n=Math.min(parseInt(d,10)||0,100);
+    el.dataset.raw=n?String(n):'';el.value=d?String(n):'';
+  });
+  el.addEventListener('blur',()=>{if(el.dataset.raw)el.value=el.dataset.raw+'%';});
+  el.addEventListener('focus',()=>{
+    el.value=el.dataset.raw||'';
+    setTimeout(()=>{el.selectionStart=el.selectionEnd=el.value.length},0);
+  });
+}
+function rawVal(id){
+  const el=document.getElementById(id);
+  const r=el.dataset&&el.dataset.raw;
+  if(r!==undefined&&r!=='')return parseFloat(r)||0;
+  return parseFloat(el.value.replace(/[R$\s.\u00a0%]/g,'').replace(',','.'))||0;
+}
+window.addEventListener('DOMContentLoaded',()=>{
+  maskMoney(document.getElementById('investimento'));
+  maskMoney(document.getElementById('custos'));
+  maskMoney(document.getElementById('preco'));
+  maskInt(document.getElementById('slots'));
+  maskPct(document.getElementById('ocupacao'));
+});
+
+/* ================================================================
+   FORMATAÇÃO
+================================================================ */
+const BRL=n=>'R$\u00a0'+n.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+const NUM=n=>Math.round(n).toLocaleString('pt-BR');
+const hoje=()=>new Date().toLocaleDateString('pt-BR',{day:'2-digit',month:'long',year:'numeric'});
+
+/* ================================================================
+   VALIDAÇÃO DO FORMULÁRIO
+================================================================ */
+function validar(){
+  const regras=[
+    {id:'cidade',  wrap:'f-cidade',      ok:()=>document.getElementById('cidade').value.trim().length>=2},
+    {id:'estado',  wrap:'f-estado',      ok:()=>document.getElementById('estado').value!==''},
+    {id:'investimento',wrap:'f-investimento',ok:()=>rawVal('investimento')>0},
+    {id:'custos',  wrap:'f-custos',      ok:()=>rawVal('custos')>=0},
+    {id:'preco',   wrap:'f-preco',       ok:()=>rawVal('preco')>0},
+    {id:'slots',   wrap:'f-slots',       ok:()=>rawVal('slots')>=1},
+    {id:'ocupacao',wrap:'f-ocupacao',    ok:()=>rawVal('ocupacao')>=1&&rawVal('ocupacao')<=100},
+  ];
+  let ok=true;
+  regras.forEach(r=>{
+    const el=document.getElementById(r.id),wp=document.getElementById(r.wrap);
+    if(!r.ok()){el.classList.add('error');wp.classList.add('has-error');ok=false;}
+    else{el.classList.remove('error');wp.classList.remove('has-error');}
+  });
+  return ok;
+}
+document.querySelectorAll('#planForm input,#planForm select').forEach(el=>{
+  el.addEventListener('input',function(){
+    this.classList.remove('error');
+    const w=this.closest('.field');if(w)w.classList.remove('has-error');
+  });
+});
+
+/* ================================================================
+   LOADING STEPS
+================================================================ */
+function setStep(n){
+  for(let i=1;i<=4;i++){
+    const li=document.getElementById('step'+i);if(!li)continue;
+    const ic=li.querySelector('.si');
+    li.classList.remove('done','active-step');
+    if(i<n){li.classList.add('done');ic.textContent='✅';}
+    if(i===n){li.classList.add('active-step');ic.textContent='⏳';}
+  }
+}
+
+/* ================================================================
+   CLAUDE API — Dados REAIS do IBGE via web search
+   BLOQUEIA o relatório se a API falhar — sem estimativas
+================================================================ */
+async function buscarDadosIBGE(cidade,estado){
+  const prompt=`Você é analista de dados municipais do Brasil. Pesquise dados REAIS e VERIFICADOS do IBGE para o município de ${cidade}, ${estado}, Brasil.
+
+IMPORTANTE: Use APENAS dados oficiais do IBGE (Censo, CEMPRE, IBGE Cidades, PIB Municipal). Não invente valores. Se um dado não for encontrado, coloque null.
+
+Retorne SOMENTE JSON válido, sem markdown, sem texto extra:
+{
+  "populacao_texto": "ex: 365.277 habitantes (IBGE Censo 2022)",
+  "populacao_num": 365277,
+  "pib_per_capita": "ex: R$ 22.480 (IBGE 2021)",
+  "pib_total": "ex: R$ 8,2 bilhões (IBGE 2021)",
+  "idh": "ex: 0,677 (PNUD 2010)",
+  "area_km2": "ex: 920,6 km²",
+  "densidade_demo": "ex: 397,4 hab/km²",
+  "regiao_geografica": "ex: Agreste Pernambucano",
+  "ranking_estado": "ex: 3ª cidade mais populosa de PE",
+  "total_empresas_texto": "ex: 12.450 empresas ativas (IBGE CEMPRE 2021)",
+  "total_empresas_num": 12450,
+  "atividades_economicas": "atividades econômicas reais em 1-2 frases baseadas em dados IBGE",
+  "perfil_comercial": "perfil comercial real da cidade em 2-3 frases — feiras, polos, shopping, comércio de rua, etc.",
+  "publico_anunciantes": "descrição dos potenciais anunciantes de painel LED NESSA cidade especificamente, em 2 parágrafos separados por \\n. Baseado no perfil econômico real.",
+  "oportunidades_ooh": "oportunidades reais para mídia OOH nessa cidade — eventos, pontos de fluxo, sazonalidade — em 2 parágrafos separados por \\n"
+}`;
+
+  const resp=await fetch(API_ENDPOINT,{
+    method:'POST',
+    headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      model:'claude-sonnet-4-20250514',
+      max_tokens:1800,
+      tools:[{type:'web_search_20250305',name:'web_search'}],
+      messages:[{role:'user',content:prompt}]
+    })
+  });
+
+  if(!resp.ok){
+    const err=await resp.json().catch(()=>({}));
+    throw new Error((err.error&&err.error.message)||`Erro HTTP ${resp.status}`);
+  }
+
+  const data=await resp.json();
+  const texto=(data.content||[]).filter(b=>b.type==='text').map(b=>b.text).join('');
+  const m=texto.match(/\{[\s\S]*?\}/);
+  if(!m)throw new Error('Dados do IBGE não encontrados na resposta da API.');
+
+  const parsed=JSON.parse(m[0]);
+
+  // Valida que veio pelo menos população — campo mínimo obrigatório
+  if(!parsed.populacao_num||parsed.populacao_num<=0){
+    throw new Error(`Não foi possível encontrar dados do IBGE para "${cidade}/${estado}". Verifique o nome do município.`);
+  }
+
+  return parsed;
+}
+
+/* ================================================================
+   CÁLCULOS FINANCEIROS
+================================================================ */
+function calcFin(d){
+  const tx=d.ocupacao/100,slV=d.slots*tx;
+  const recM=slV*d.preco,lucM=recM-d.custos;
+  const marg=recM>0?(lucM/recM)*100:0;
+  const pbk=lucM>0?d.investimento/lucM:Infinity;
+  const recA=recM*12,lucA=lucM*12;
+  const roi=d.investimento>0?(lucA/d.investimento)*100:0;
+  const cen=f=>{
+    const oc=Math.min(Math.max(d.ocupacao*f,1),100);
+    const rec=d.slots*(oc/100)*d.preco,luc=rec-d.custos;
+    return{oc,rec,luc,pbk:luc>0?d.investimento/luc:Infinity,roi:d.investimento>0?(luc*12/d.investimento)*100:0,marg:rec>0?(luc/rec)*100:0};
+  };
+  return{recM,lucM,marg,pbk,recA,lucA,roi,slV,cens:{c:cen(.6),r:cen(1),o:cen(1.3)}};
+}
+
+/* ================================================================
+   MOTOR DE VIABILIDADE SINCERO
+   — classifica em VIÁVEL / PARCIAL / INVIÁVEL
+   — calcula painel alternativo menor quando não viável
+================================================================ */
+function analisarViabilidade(fin,d,pop){
+  const{lucM,pbk,roi,marg}=fin;
+
+  const lucroPos  = lucM>0;
+  const pbkBom    = pbk<=48;   // ≤ 4 anos: retorno bom para OOH
+  const pbkOk     = pbk<=72;   // ≤ 6 anos: aceitável
+  const roiOk     = roi>=15;   // ROI mínimo atrativo para o setor
+  const margOk    = marg>=25;  // margem operacional saudável
+  const mercOk    = pop>=20000;// mercado mínimo para painel
+
+  let nivel,cor;
+  if(lucroPos&&pbkBom&&roiOk&&margOk)   {nivel='VIÁVEL';   cor='success';}
+  else if(lucroPos&&pbkOk&&marg>=15)    {nivel='PARCIAL';  cor='warning';}
+  else                                   {nivel='INVIÁVEL'; cor='danger';}
+
+  // ── Busca painel alternativo viável ─────────────────────────
+  let alt=null;
+  if(nivel!=='VIÁVEL'){
+    // Testa reduções de 5% em 5% do investimento, de 75% até 20%
+    for(let f=0.75;f>=0.20;f=Math.round((f-0.05)*100)/100){
+      const inv=Math.round(d.investimento*f);
+      const sl =Math.max(Math.round(d.slots*f),1);
+      const cst=Math.round(d.custos*f);
+      const fa =calcFin({...d,investimento:inv,slots:sl,custos:cst});
+      if(fa.lucM>0&&fa.pbk<=48&&fa.roi>=15&&fa.marg>=20){
+        alt={investimento:inv,slots:sl,custos:cst,
+          recM:fa.recM,lucM:fa.lucM,pbk:fa.pbk,roi:fa.roi,marg:fa.marg,
+          fator:f,desc:`Painel de ${sl} slot${sl>1?'s':''} (${Math.round(f*100)}% do porte original)`};
+        break;
+      }
+    }
+  }
+
+  // ── Lista de problemas identificados ────────────────────────
+  const problemas=[];
+  if(!lucroPos) problemas.push('a receita não cobre os custos mensais — prejuízo operacional certo');
+  else if(!pbkBom&&!pbkOk) problemas.push(`prazo de retorno muito longo (${pbk===Infinity?'indefinido':pbk.toFixed(0)+' meses'})`);
+  else if(!pbkBom) problemas.push(`prazo de retorno extenso (${pbk.toFixed(0)} meses — acima dos 48 ideais para OOH)`);
+  if(lucroPos&&!roiOk) problemas.push(`ROI anual baixo (${roi.toFixed(1)}% — mínimo esperado: 15%)`);
+  if(lucroPos&&!margOk) problemas.push(`margem de lucro estreita (${marg.toFixed(1)}% — ideal acima de 25%)`);
+  if(!mercOk) problemas.push(`mercado muito pequeno (${NUM(pop)} hab.) para sustentar um painel de ${d.slots} slots`);
+
+  return{nivel,cor,lucroPos,pbkBom,pbkOk,roiOk,margOk,mercOk,problemas,alt};
+}
+
+/* ================================================================
+   SUBMIT
+================================================================ */
+document.getElementById('planForm').addEventListener('submit',async function(e){
+  e.preventDefault();
+  if(!validar()){
+    const f=document.querySelector('.field.has-error input,.field.has-error select');
+    if(f)f.scrollIntoView({behavior:'smooth',block:'center'});
+    return;
+  }
+
+  const d={
+    cidade:document.getElementById('cidade').value.trim(),
+    estado:document.getElementById('estado').value,
+    investimento:rawVal('investimento'),
+    custos:rawVal('custos'),
+    preco:rawVal('preco'),
+    slots:rawVal('slots'),
+    ocupacao:rawVal('ocupacao'),
+  };
+
+  const btn=document.getElementById('btnGerar');
+  const errBox=document.getElementById('apiError');
+
+  // Reset UI
+  btn.disabled=true;btn.textContent='Consultando…';
+  document.getElementById('report').style.display='none';
+  errBox.classList.remove('show');
+  document.getElementById('loadingOverlay').classList.add('active');
+  document.getElementById('loadingOverlay').scrollIntoView({behavior:'smooth',block:'start'});
+
+  try{
+    // ── 1. Dados IBGE ──────────────────────────────────────────
+    setStep(1);
+    const ibge=await buscarDadosIBGE(d.cidade,d.estado);
+
+    // ── 2. Perfil obtido ───────────────────────────────────────
+    setStep(2);
+    await new Promise(r=>setTimeout(r,200));
+
+    // ── 3. Cálculos ────────────────────────────────────────────
+    setStep(3);
+    const pop=ibge.populacao_num;
+    const fin=calcFin(d);
+    const viab=analisarViabilidade(fin,d,pop);
+    await new Promise(r=>setTimeout(r,180));
+
+    // ── 4. Renderizar ──────────────────────────────────────────
+    setStep(4);
+    await new Promise(r=>setTimeout(r,150));
+
+    document.getElementById('loadingOverlay').classList.remove('active');
+    btn.disabled=false;btn.textContent='Gerar Plano de Negócio';
+
+    renderReport(d,fin,ibge,viab);
+    setTimeout(()=>document.getElementById('report').scrollIntoView({behavior:'smooth',block:'start'}),100);
+
+  }catch(err){
+    // ── BLOQUEIA — mostra erro real, não gera com dados falsos ──
+    document.getElementById('loadingOverlay').classList.remove('active');
+    btn.disabled=false;btn.textContent='Gerar Plano de Negócio';
+    document.getElementById('apiErrorMsg').textContent=err.message;
+    errBox.classList.add('show');
+    errBox.scrollIntoView({behavior:'smooth',block:'center'});
+    console.error('[PainelPRO]',err);
+  }
+});
+
+/* ================================================================
+   RENDERIZAÇÃO DO RELATÓRIO
+================================================================ */
+function renderReport(d,fin,ibge,viab){
+  const{cidade,estado,investimento,custos,preco,slots,ocupacao}=d;
+  const{recM,lucM,marg,pbk,recA,lucA,roi,slV,cens}=fin;
+  const{nivel,cor,problemas,alt}=viab;
+
+  const pbkStr=pbk===Infinity
+    ?'Não atingido (prejuízo)'
+    :`${pbk.toFixed(1).replace('.',',')} meses (≈ ${(pbk/12).toFixed(1).replace('.',',')} anos)`;
+
+  // ── Projeção 12 meses ─────────────────────────────────────────
+  let tRows='',acc=-investimento;
+  for(let m=1;m<=12;m++){
+    acc+=lucM;
+    tRows+=`<tr>
+      <td>Mês ${m}</td><td>${BRL(recM)}</td><td>${BRL(custos)}</td>
+      <td class="${lucM>=0?'pos':'neg'}">${BRL(lucM)}</td>
+      <td class="${acc>=0?'pos':'neg'}">${BRL(acc)}</td>
+    </tr>`;
+  }
+
+  // ── Tabela IBGE ───────────────────────────────────────────────
+  const row=(l,v)=>v?`<tr><td>${l}</td><td>${v}</td></tr>`:'';
+  const ibgeRows=
+    row('População',ibge.populacao_texto)+
+    row('PIB per capita',ibge.pib_per_capita)+
+    row('PIB total',ibge.pib_total)+
+    row('IDH',ibge.idh)+
+    row('Área',ibge.area_km2)+
+    row('Densidade demográfica',ibge.densidade_demo)+
+    row('Região',ibge.regiao_geografica)+
+    row('Ranking no estado',ibge.ranking_estado)+
+    row('Empresas ativas (IBGE)',ibge.total_empresas_texto);
+
+  const totalEmp=ibge.total_empresas_num||0;
+  const potAnunc=totalEmp?Math.round(totalEmp*.08):0;
+
+  // ── Textos IA ─────────────────────────────────────────────────
+  const toP=s=>(s||'').split(/\n+/).filter(Boolean).map(p=>`<p>${p}</p>`).join('');
+  const pubHtml   =toP(ibge.publico_anunciantes);
+  const oopHtml   =toP(ibge.oportunidades_ooh);
+  const atvsHtml  =ibge.atividades_economicas?`<p>${ibge.atividades_economicas}</p>`:'';
+  const perfHtml  =ibge.perfil_comercial?`<p>${ibge.perfil_comercial}</p>`:'';
+
+  // ── Bloco de veredicto ────────────────────────────────────────
+  const icones={VIÁVEL:'✅',PARCIAL:'⚠️',INVIÁVEL:'❌'};
+  let veredictoHtml='';
+
+  if(nivel==='VIÁVEL'){
+    veredictoHtml=`
+      <div class="alert-box success">
+        <div class="alert-title">${icones[nivel]} Negócio VIÁVEL — os números fecham</div>
+        <p>Com investimento de <strong>${BRL(investimento)}</strong>, lucro mensal de <strong>${BRL(lucM)}</strong> (margem ${marg.toFixed(1)}%), ROI de <strong>${roi.toFixed(1)}%/ano</strong> e retorno em <strong>${pbkStr}</strong>, este painel tem fundamentos sólidos para ${cidade}. O negócio sustenta-se financeiramente e remunera bem o capital.</p>
+      </div>`;
+  } else if(nivel==='PARCIAL'){
+    veredictoHtml=`
+      <div class="alert-box warning">
+        <div class="alert-title">${icones[nivel]} Viabilidade PARCIAL — atenção aos riscos</div>
+        <p>O negócio gera lucro, mas com margem apertada. Pontos de atenção: <strong>${problemas.join('; ')}</strong>. Qualquer queda de ocupação pode comprometer o resultado. Avalie com cautela — o risco é real.</p>
+      </div>`;
+  } else {
+    veredictoHtml=`
+      <div class="alert-box danger">
+        <div class="alert-title">${icones[nivel]} Negócio INVIÁVEL neste formato</div>
+        <p>Sendo direto: <strong>este investimento não se sustenta</strong> para um painel deste porte em ${cidade}. Problemas identificados: <strong>${problemas.join('; ')}</strong>.</p>
+        ${alt?`<p style="margin-top:8px">Existe, porém, uma alternativa viável — veja a recomendação abaixo.</p>`:`<p style="margin-top:8px">Não foi possível encontrar uma configuração viável para este mercado com os parâmetros informados. Considere revisar o preço por slot, reduzir custos fixos ou avaliar outro ponto de maior fluxo.</p>`}
+      </div>`;
+  }
+
+  // ── Painel alternativo ────────────────────────────────────────
+  let altHtml='';
+  if(alt&&nivel!=='VIÁVEL'){
+    altHtml=`
+      <div class="alt-panel">
+        <div class="alt-label">💡 Recomendação — ${alt.desc}</div>
+        <p style="font-size:.89rem;line-height:1.74;color:rgba(13,13,13,.73);margin-bottom:0">
+          Em vez de investir <strong>${BRL(investimento)}</strong> em um painel de <strong>${slots} slots</strong>,
+          comece com um painel menor: investimento de <strong style="color:var(--blue)">${BRL(alt.investimento)}</strong>,
+          ${alt.slots} slot${alt.slots>1?'s':''} e custo mensal de <strong>${BRL(alt.custos)}</strong>.
+          Com a mesma taxa de ocupação, este formato fecha as contas com saúde financeira.
+          Você valida o mercado, gera caixa e reinveste para escalar com segurança.
+        </p>
+        <div class="alt-grid">
+          <div class="ac"><div class="ac-l">Investimento</div><div class="ac-v">${BRL(alt.investimento)}</div><div class="ac-s">${Math.round(alt.fator*100)}% do original</div></div>
+          <div class="ac"><div class="ac-l">Slots</div><div class="ac-v">${alt.slots}</div><div class="ac-s">vs. ${slots} originais</div></div>
+          <div class="ac"><div class="ac-l">Receita/mês</div><div class="ac-v">${BRL(alt.recM)}</div><div class="ac-s">&nbsp;</div></div>
+          <div class="ac"><div class="ac-l">Lucro/mês</div><div class="ac-v ok">${BRL(alt.lucM)}</div><div class="ac-s">Margem ${alt.marg.toFixed(1)}%</div></div>
+          <div class="ac"><div class="ac-l">Payback</div><div class="ac-v ok">${alt.pbk.toFixed(0)} meses</div><div class="ac-s">≈ ${(alt.pbk/12).toFixed(1).replace('.',',')} anos</div></div>
+          <div class="ac"><div class="ac-l">ROI anual</div><div class="ac-v ok">${alt.roi.toFixed(1)}%</div><div class="ac-s">Atrativo ✓</div></div>
+        </div>
+      </div>`;
+  }
+
+  // ── Cenário helper ────────────────────────────────────────────
+  const sRow=(l,v)=>`<div class="sr"><span class="sl">${l}</span><span class="sv">${v}</span></div>`;
+  const sCard=(cls,ico,lbl,c)=>`
+    <div class="sc ${cls}">
+      <div class="sc-t">${ico} ${lbl}</div>
+      ${sRow('Ocupação',c.oc.toFixed(0)+'%')}
+      ${sRow('Receita/mês',BRL(c.rec))}
+      ${sRow('Lucro/mês',`<span class="${c.luc>=0?'pos':'neg'}">${BRL(c.luc)}</span>`)}
+      ${sRow('Payback',c.pbk===Infinity?'Não atingido':c.pbk.toFixed(0)+' meses')}
+      ${sRow('ROI anual',c.roi.toFixed(1)+'%')}
+    </div>`;
+
+  // ── HTML FINAL ────────────────────────────────────────────────
+  document.getElementById('report').innerHTML=`
+  <div class="rh">
+    <div class="rhn"></div><div class="rha"></div>
+    <div class="rhl">Plano de Negócio — Mídia OOH · Painel de LED</div>
+    <h2>Análise de Viabilidade<br>para ${cidade}, ${estado}</h2>
+    <div class="rm">
+      <span><strong>Data</strong>${hoje()}</span>
+      <span><strong>Investimento</strong>${BRL(investimento)}</span>
+      <span><strong>Receita projetada</strong>${BRL(recM)}/mês</span>
+      <span><strong>Veredicto</strong>${nivel}</span>
+      <span><strong>Fonte</strong>IBGE — dados verificados</span>
+    </div>
+  </div>
+
+  <div class="rb">
+
+    <!-- 01 RESUMO & VEREDICTO -->
+    <div class="rs">
+      <div class="rsl">01</div>
+      <h3>Resumo Executivo & Veredicto</h3>
+      <p>
+        Análise de viabilidade para um painel de LED em
+        <span class="hl">${cidade}${ibge.regiao_geografica?' — '+ibge.regiao_geografica:''}, ${estado}</span>.
+        População: <span class="hl">${ibge.populacao_texto||NUM(ibge.populacao_num)+' hab.'}</span>.
+        Modelo avaliado: <strong>${slots} slots</strong> a <span class="hl">${BRL(preco)}</span>/slot
+        com <span class="hl">${ocupacao}%</span> de ocupação estimada.
+      </p>
+      ${veredictoHtml}
+      ${altHtml}
+      <div class="kpi-grid">
+        <div class="kc gold"><div class="kl">Receita Mensal</div><div class="kv">${BRL(recM)}</div><div class="ks">${slV.toFixed(1).replace('.',',')} slots vendidos</div></div>
+        <div class="kc ${lucM>=0?'green':'rust'}"><div class="kl">Lucro Mensal</div><div class="kv">${BRL(lucM)}</div><div class="ks">Margem: ${marg.toFixed(1)}%</div></div>
+        <div class="kc ink"><div class="kl">Payback</div><div class="kv">${pbk===Infinity?'∞':pbk.toFixed(0)+' m'}</div><div class="ks">${pbk===Infinity?'Não atingido':(pbk/12).toFixed(1).replace('.',',')+' anos'}</div></div>
+        <div class="kc ${roi>=15?'green':'rust'}"><div class="kl">ROI Anual</div><div class="kv">${roi.toFixed(1)}%</div><div class="ks">Mínimo esperado: 15%</div></div>
+        <div class="kc gold"><div class="kl">Receita Anual</div><div class="kv">${BRL(recA)}</div><div class="ks">Projeção 12 meses</div></div>
+        <div class="kc ${lucA>=0?'green':'rust'}"><div class="kl">Lucro Anual</div><div class="kv">${BRL(lucA)}</div><div class="ks">Projeção 12 meses</div></div>
+      </div>
+    </div>
+
+    <!-- 02 DADOS IBGE -->
+    <div class="rs">
+      <div class="rsl">02</div>
+      <h3>Dados da Cidade — IBGE</h3>
+      <span class="ibge-badge">Dados verificados via IBGE em tempo real</span>
+      <table class="ibge-table">${ibgeRows}</table>
+      ${atvsHtml?`<div class="aic">${atvsHtml}</div>`:''}
+      ${perfHtml?`<div class="aic">${perfHtml}</div>`:''}
+      ${totalEmp>0?`<p>Base de mercado: <span class="hl">${NUM(totalEmp)} empresas ativas</span> (IBGE CEMPRE), com potencial de <span class="hl">~${NUM(potAnunc)} anunciantes</span> no 1º ano (~8% do total).</p>`:''}
+      ${oopHtml?`<p style="margin-top:14px"><strong>Oportunidades para mídia OOH em ${cidade}:</strong></p><div class="aic">${oopHtml}</div>`:''}
+    </div>
+
+    <!-- 03 PÚBLICO-ALVO -->
+    <div class="rs">
+      <div class="rsl">03</div>
+      <h3>Público-Alvo & Perfil de Anunciantes</h3>
+      <span class="ibge-badge">Baseado no perfil econômico real do município</span>
+      ${pubHtml?`<div class="aic">${pubHtml}</div>`:''}
+      <p>Segmentos prioritários por recorrência e volume:</p>
+      <ul class="rl">
+        <li><strong>Varejo & alimentação</strong> — maior volume, contratos mensais renováveis, baixo ticket por alta quantidade</li>
+        <li><strong>Saúde & beleza</strong> — alta fidelização, ticket constante, pouca sazonalidade</li>
+        <li><strong>Educação & cursos</strong> — sazonalidade forte em jan/fev e jun/jul, ticket médio-alto</li>
+        <li><strong>Imobiliário & construção</strong> — ticket alto, campanhas longas de lançamento</li>
+        <li><strong>Automotivo</strong> — concessionárias e oficinas preferem anúncios de longa duração</li>
+      </ul>
+    </div>
+
+    <!-- 04 CENÁRIOS -->
+    <div class="rs">
+      <div class="rsl">04</div>
+      <h3>Análise por Cenários</h3>
+      <p>Três variações em torno da taxa de ocupação informada. O cenário conservador (60%) simula dificuldades iniciais de venda; o otimista (130%, limitado a 100%) simula expansão rápida.</p>
+      <div class="sc-grid">
+        ${sCard('conservador','📉','Conservador',cens.c)}
+        ${sCard('realista','📊','Realista',cens.r)}
+        ${sCard('otimista','📈','Otimista',cens.o)}
+      </div>
+    </div>
+
+    <!-- 05 PROJEÇÃO FINANCEIRA -->
+    <div class="rs">
+      <div class="rsl">05</div>
+      <h3>Projeção Financeira — 12 Meses</h3>
+      <p>Projeção com ocupação estabilizada desde o 1º mês. Na prática, os primeiros meses costumam ter ocupação menor — o ramp-up comercial típico leva 3 a 6 meses.</p>
+      <div class="cw">
+        <div class="ct">Receita × Custos × Fluxo de caixa acumulado</div>
+        <canvas id="chartFin" height="90"></canvas>
+      </div>
+      <table class="pt">
+        <thead><tr><th>Período</th><th>Receita</th><th>Custos</th><th>Lucro</th><th>Acumulado</th></tr></thead>
+        <tbody>${tRows}</tbody>
+      </table>
+    </div>
+
+    <!-- 06 ESTRATÉGIA DE VENDAS -->
+    <div class="rs">
+      <div class="rsl">06</div>
+      <h3>Estratégia de Vendas</h3>
+      <ul class="rl">
+        <li><strong>Prospecção ativa</strong> — visitas presenciais nos estabelecimentos no raio de 2 km do painel, priorizando os de maior ticket médio.</li>
+        <li><strong>Contratos de fidelidade</strong> — desconto progressivo: 5% (3 meses), 10% (6 meses), 15% (12 meses).</li>
+        <li><strong>Demonstração gratuita</strong> — 7 dias sem custo para novos anunciantes qualificados durante o lançamento.</li>
+        <li><strong>Rede de parceiros</strong> — agências e assessorias locais com comissão de 10–15% por cliente indicado.</li>
+        <li><strong>Slots premium</strong> — horários de pico (07h–09h e 17h–20h) com valor diferenciado de +15 a 20%.</li>
+        <li><strong>Campanhas sazonais</strong> — pacotes para Dia das Mães, Natal, Dia dos Pais, festas regionais e períodos de matrícula.</li>
+        <li><strong>Meta de ramp-up</strong> — ${Math.round(ocupacao*.5)}% no 1º mês → ${Math.round(ocupacao*.75)}% no 3º mês → ${ocupacao}% a partir do 6º mês.</li>
+      </ul>
+    </div>
+
+    <!-- AÇÕES -->
+    <div class="rs">
+      <div class="ra">
+        <button class="btn-p" onclick="window.print()">🖨 Imprimir / Salvar PDF</button>
+        <button class="btn-p" onclick="scrollToForm()">✏️ Ajustar dados</button>
+      </div>
+      <p style="margin-top:14px;font-size:.72rem;color:rgba(13,13,13,.32)">
+        PainelPRO · ${hoje()} · Dados populacionais e econômicos via IBGE (pesquisa em tempo real). Projeções financeiras baseadas nos parâmetros informados pelo usuário. Este documento tem caráter orientativo e não substitui assessoria financeira especializada.
+      </p>
+    </div>
+
+  </div>`;
+
+  document.getElementById('report').style.display='block';
+  requestAnimationFrame(()=>setTimeout(()=>drawFin(d,fin),80));
+}
+
+/* ================================================================
+   GRÁFICO FINANCEIRO
+================================================================ */
+function drawFin(d,fin){
+  const canvas=document.getElementById('chartFin');if(!canvas)return;
+  const ctx=canvas.getContext('2d');
+  const W=canvas.offsetWidth,H=Math.round(W*.30);
+  canvas.width=W;canvas.height=H;
+  const{recM,lucM}=fin;
+  const{investimento,custos}=d;
+  const PAD={t:20,r:20,b:36,l:74};
+  const gW=W-PAD.l-PAD.r,gH=H-PAD.t-PAD.b;
+  const receitas=Array(12).fill(recM);
+  const csts=Array(12).fill(custos);
+  const acum=[];let a=-investimento;
+  for(let i=0;i<12;i++){a+=lucM;acum.push(a);}
+  const all=[...receitas,...csts,...acum];
+  const minV=Math.min(...all),maxV=Math.max(...all),rng=maxV-minV||1;
+  const toX=i=>PAD.l+(i/11)*gW;
+  const toY=v=>PAD.t+(1-(v-minV)/rng)*gH;
+
+  // Grid
+  ctx.strokeStyle='rgba(13,13,13,.07)';ctx.lineWidth=1;
+  for(let g=0;g<=4;g++){
+    const y=PAD.t+(g/4)*gH;
+    ctx.beginPath();ctx.moveTo(PAD.l,y);ctx.lineTo(W-PAD.r,y);ctx.stroke();
+    const v=maxV-(g/4)*rng,av=Math.abs(v);
+    const lbl=(v<0?'-':'')+(av>=1000?'R$'+(av/1e3).toLocaleString('pt-BR',{minimumFractionDigits:1,maximumFractionDigits:1})+'k':'R$'+av.toLocaleString('pt-BR',{maximumFractionDigits:0}));
+    ctx.fillStyle='#aaa';ctx.font='10px DM Mono,monospace';ctx.textAlign='right';
+    ctx.fillText(lbl,PAD.l-4,y+3);
+  }
+  // Linha zero
+  if(minV<0&&maxV>0){
+    const y0=toY(0);
+    ctx.strokeStyle='rgba(13,13,13,.18)';ctx.setLineDash([4,4]);
+    ctx.beginPath();ctx.moveTo(PAD.l,y0);ctx.lineTo(W-PAD.r,y0);ctx.stroke();
+    ctx.setLineDash([]);
+  }
+  const drawLine=(data,col,dashed)=>{
+    ctx.beginPath();ctx.strokeStyle=col;ctx.lineWidth=2;ctx.setLineDash(dashed?[6,4]:[]);
+    data.forEach((v,i)=>i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v)));
+    ctx.stroke();ctx.setLineDash([]);
+    data.forEach((v,i)=>{ctx.beginPath();ctx.arc(toX(i),toY(v),3,0,Math.PI*2);ctx.fillStyle=col;ctx.fill();});
+  };
+  drawLine(receitas,'#C8932A',false);
+  drawLine(csts,'#B85C2A',true);
+  drawLine(acum,'#2A7A4B',false);
+  // Eixo X
+  ctx.fillStyle='#aaa';ctx.font='10px DM Sans,sans-serif';ctx.textAlign='center';
+  for(let i=0;i<12;i++)ctx.fillText('M'+(i+1),toX(i),H-PAD.b+14);
+  // Legenda
+  [['Receita','#C8932A'],['Custos','#B85C2A'],['Acumulado','#2A7A4B']].forEach(([lbl,col],i)=>{
+    const lx=PAD.l+i*110;
+    ctx.fillStyle=col;ctx.fillRect(lx,H-10,16,3);
+    ctx.fillStyle='#666';ctx.font='10px DM Sans,sans-serif';ctx.textAlign='left';
+    ctx.fillText(lbl,lx+20,H-6);
+  });
+}
+
+/* ================================================================
+   CLEAR / SCROLL
+================================================================ */
+function clearForm(){
+  document.getElementById('planForm').reset();
+  document.querySelectorAll('#planForm input').forEach(el=>{el.dataset.raw='';});
+  document.querySelectorAll('.field').forEach(f=>f.classList.remove('has-error'));
+  document.querySelectorAll('input,select').forEach(el=>el.classList.remove('error'));
+  document.getElementById('report').style.display='none';
+  document.getElementById('loadingOverlay').classList.remove('active');
+  document.getElementById('apiError').classList.remove('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function scrollToForm(){
+  document.querySelector('.fw').scrollIntoView({behavior:'smooth',block:'start'});
+}
+</script>
+</body>
+</html>
