@@ -91,14 +91,15 @@ const server = http.createServer((req, res) => {
   }
 
   // Health check (Render usa isso)
-  if (req.method === 'GET' && (req.url === '/' || req.url === '/health')) {
-    setCors(res);
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    return res.end(JSON.stringify({
-      status: 'ok',
-      service: 'PainelPRO Proxy'
-    }));
-  }
+
+if (req.method === 'GET' && req.url === '/health') {
+  setCors(res);
+  res.writeHead(200, { 'Content-Type': 'application/json' });
+  return res.end(JSON.stringify({
+    status: 'ok',
+    service: 'PainelPRO Proxy'
+  }));
+}
 
 
 
