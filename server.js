@@ -101,34 +101,27 @@ const server = http.createServer((req, res) => {
   }
 
 
-  if (req.method === 'GET' && req.url === '/teste') {
-  setCors(res);
-  res.writeHead(200, { 'Content-Type': 'text/html' });
 
-  return res.end(`
-    <h1>Teste PainelPRO 🚀</h1>
-    <script>
-      fetch('/api/anthropic', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          model: "claude-3-haiku-20240307",
-          max_tokens: 50,
-          messages: [
-            { role: "user", content: "Crie um plano de negócio simples" }
-          ]
-        })
-      })
-      .then(res => res.json())
-      .then(data => {
-        document.body.innerHTML += '<pre>' + JSON.stringify(data, null, 2) + '</pre>';
-      })
-      .catch(err => {
-        document.body.innerHTML += '<pre>Erro: ' + err + '</pre>';
-      });
-    </script>
-  `);
+  
+const fs = require('fs');
+const path = require('path');
+
+if (req.method === 'GET' && req.url === '/') {
+  const filePath = path.join(__dirname, 'plano_negocio_led.html');
+
+  fs.readFile(filePath, (err, data) => {
+    if (err) {
+      res.writeHead(500);
+      return res.end('Erro ao carregar HTML');
+    }
+
+    res.writeHead(200, { 'Content-Type': 'text/html' });
+    res.end(data);
+  });
+
+  return;
 }
+  
 
 
   
