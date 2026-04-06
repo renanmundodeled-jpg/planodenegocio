@@ -41,7 +41,11 @@ function proxyAnthropic(req, res) {
         'anthropic-version': '2023-06-01',
       }
     };
-
+"scripts": (
+  "build": "npm install",
+  "start": "node app.js",
+  "test": "echo \"Error: no test specified\"&& exit 1"
+)
     const apiReq = https.request(options, apiRes => {
       let data = '';
       apiRes.on('data', chunk => { data += chunk; });
