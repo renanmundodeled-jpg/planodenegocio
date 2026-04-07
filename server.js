@@ -6,7 +6,7 @@
 const http  = require('http');
 const https = require('https');
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000;
 const API_KEY = process.env.ANTHROPIC_KEY; // coloque no Render (Environment)
 
 function setCors(res) {
